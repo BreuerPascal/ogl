@@ -77,9 +77,19 @@ int main()
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
     ShaderLoader shaderLoader{};
-    GLuint program_id = shaderLoader.load("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
-
+    GLuint program_id_red = shaderLoader.load("shaders/SimpleVertexShader.vertexshader", "shaders/SimpleFragmentShader.fragmentshader");
+    GLuint program_id_blue = shaderLoader.load("shaders/SimpleVertexShader.vertexshader", "shaders/SimpleFragmentShaderBlue.fragmentshader");
+    GLuint program_id = program_id_red;
+    int counter = 0;
 	do{
+        if(counter == 30) {
+            counter = 0;
+            if(program_id == program_id_red) {
+                program_id = program_id_blue;
+            } else {
+                program_id = program_id_red;
+            }
+        }
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // use the shader
         glUseProgram(program_id);
@@ -102,10 +112,11 @@ int main()
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+        ++counter;
 
 	} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-		   glfwWindowShouldClose(window) == 0 );
+           glfwWindowShouldClose(window) == 0 );
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();

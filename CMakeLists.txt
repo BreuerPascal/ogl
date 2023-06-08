@@ -520,8 +520,9 @@ add_executable(playground
         playground/util/shaderloader.h
         playground/util/shaderloader.cpp
 
-        playground/SimpleVertexShader.vertexshader
-        playground/SimpleFragmentShader.fragmentshader
+        playground/shaders/SimpleVertexShader.vertexshader
+        playground/shaders/SimpleFragmentShader.fragmentshader
+        playground/shaders/SimpleFragmentShaderBlue.fragmentshader
 )
 target_link_libraries(playground
 	${ALL_LIBS}
@@ -777,4 +778,3 @@ add_custom_command(
 elseif (${CMAKE_GENERATOR} MATCHES "Xcode" )
 
 endif (NOT ${CMAKE_GENERATOR} MATCHES "Xcode" )
-
