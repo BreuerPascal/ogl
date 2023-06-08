@@ -14,11 +14,11 @@ GLuint ShaderLoader::load(const std::string_view vertex_file_path, std::string_v
     GLuint vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
     std::optional<std::string> vertex_shader_code = readShaderFromFile(vertex_file_path);
-    if(vertex_shader_code.has_value()) {
+    if(!vertex_shader_code.has_value()) {
         return 0;
     }
     std::optional<std::string> fragment_shader_code = readShaderFromFile(fragment_file_path);
-    if(fragment_shader_code.has_value()) {
+    if(!fragment_shader_code.has_value()) {
         return 0;
     }
 
