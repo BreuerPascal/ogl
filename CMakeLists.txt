@@ -515,8 +515,13 @@ create_target_launcher(tutorial17_rotations WORKING_DIRECTORY "${CMAKE_CURRENT_S
 # User playground
 add_executable(playground 
 	playground/playground.cpp
-	common/shader.cpp
-	common/shader.hpp
+#	common/shader.cpp
+#	common/shader.hpp
+        playground/util/shaderloader.h
+        playground/util/shaderloader.cpp
+
+        playground/SimpleVertexShader.vertexshader
+        playground/SimpleFragmentShader.fragmentshader
 )
 target_link_libraries(playground
 	${ALL_LIBS}
