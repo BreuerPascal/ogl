@@ -6,10 +6,26 @@
 
 #include <GLFW/glfw3.h>
 GLFWwindow* window;
+int width = 1024;
+int height = 768;
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 #include <iostream>
 #include <playground/util/shaderloader.h>
+#include <glm/gtx/string_cast.hpp>
+
+
+
+
+
+void justMatrixComputationTests() {
+    glm::mat4 matrix{1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0};
+    std::cout << glm::to_string(matrix) << std::endl;
+}
+
+
 
 int main()
 {
@@ -30,7 +46,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // We don't want the old OpenGL
 
 	// Open a window and create its OpenGL context
-    window = glfwCreateWindow( 1024, 768, "Playground", nullptr, nullptr);
+    window = glfwCreateWindow( width, height, "Playground", nullptr, nullptr);
     if( window == nullptr ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		getchar();
@@ -81,6 +97,29 @@ int main()
     GLuint program_id_blue = shaderLoader.load("shaders/SimpleVertexShader.vertexshader", "shaders/SimpleFragmentShaderBlue.fragmentshader");
     GLuint program_id = program_id_red;
     int counter = 0;
+
+    // Projection Matrix
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float) width / (float) height, 0.1f, 100.0f);
+
+    // for an ortho camera
+    // glm::mat4 projectionMatrix = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 100.0f); // In world coordiantes
+
+    // Camera/View Matrix
+    glm::mat4 viewMatrix = glm::lookAt(
+                glm::vec3(4,3,3),   // Camera is at (4,3,3) in World Space
+                glm::vec3(0,0,0),   // and looks at the origin
+                glm:: vec3(0,1,0)   // Head is up (set to 0, -1, 0 to look upside-down
+    );
+
+//    // Modle matirx: an identity matrix (model will be at the origin)
+//    glm::mat4 modelMatrix = glm::mat4(1.0f);
+//    // Our ModelViewProjection : multiplication of our 3 matrices
+//    glm::mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
+
+    GLuint matrixID = glGetUniformLocation(program_id, "MVP");
+
+    float z_axis_rotation = 1.0f;
+
 	do{
         if(counter == 30) {
             counter = 0;
@@ -93,7 +132,21 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // use the shader
         glUseProgram(program_id);
-		// Draw nothing, see you in tutorial 2 !
+        // Draw nothing, see you in tutorial 2 !
+
+
+
+        // Modle matirx: an identity matrix (model will be at the origin)
+        glm::mat4 translate = glm::mat4(1.0f);
+        glm::mat4 scale = glm::mat4(1.0f);
+        glm::vec3 rotationAxis(1.0f, 1.0f, 1.0f);
+        glm::mat4 rotation = glm::rotate(z_axis_rotation, rotationAxis);
+        glm::mat4 modelMatrix = translate * rotation * scale;
+        // Our ModelViewProjection : multiplication of our 3 matrices
+        glm::mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
+
+
+        glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
         // first attribute buffer: vertices
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -113,6 +166,7 @@ int main()
 		glfwSwapBuffers(window);
 		glfwPollEvents();
         ++counter;
+        z_axis_rotation += 0.025f;
 
 	} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
@@ -121,6 +175,7 @@ int main()
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
 
+    justMatrixComputationTests();
+
 	return 0;
 }
-
