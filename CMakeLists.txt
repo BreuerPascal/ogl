@@ -523,6 +523,10 @@ add_executable(playground
         playground/shaders/SimpleVertexShader.vertexshader
         playground/shaders/SimpleFragmentShader.fragmentshader
         playground/shaders/SimpleFragmentShaderBlue.fragmentshader
+        playground/shaders/defaultVertexShader.vertexshader
+        playground/shaders/defaultFragmentShader.fragmentshader
+        playground/staticdrawable.h
+        playground/staticdrawable.cpp
 )
 target_link_libraries(playground
 	${ALL_LIBS}
