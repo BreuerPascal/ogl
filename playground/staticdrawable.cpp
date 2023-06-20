@@ -85,12 +85,12 @@ void StaticDrawable::init()
     // The following commands will talk about our 'vertexbuffer' buffer
     glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
     // Give our vertices to OpenGL
-    glBufferData(GL_ARRAY_BUFFER, m_vertices.size(), m_vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_vertices.size()*sizeof(GLfloat), m_vertices.data(), GL_STATIC_DRAW);
 
     glGenBuffers(1, &m_colorbuffer);
     // The following commands will talk about our 'vertexbuffer' buffer
     glBindBuffer(GL_ARRAY_BUFFER, m_colorbuffer);
     // Give our vertices to OpenGL
-    glBufferData(GL_ARRAY_BUFFER, m_colors.size(), m_colors.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_colors.size() * sizeof(GLfloat), m_colors.data(), GL_STATIC_DRAW);
 }
 

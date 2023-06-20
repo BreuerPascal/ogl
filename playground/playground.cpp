@@ -191,8 +191,8 @@ int useObjects() {
     do{
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//        cube.draw(viewMatrix, projectionMatrix);
-        triangle.draw(viewMatrix, projectionMatrix);
+        cube.draw(viewMatrix, projectionMatrix);
+//        triangle.draw(viewMatrix, projectionMatrix);
         // Swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
