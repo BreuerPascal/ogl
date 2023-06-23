@@ -16,6 +16,9 @@ int height = 768;
 #include <playground/util/shaderloader.h>
 #include <playground/staticdrawable.h>
 #include <glm/gtx/string_cast.hpp>
+#include <random> // for std::mt19937
+#include <chrono> // for std::chrono
+#include "util/imageloader.h"
 
 int useObjects() {
     glewExperimental = true; // Needed in core profile
@@ -58,6 +61,15 @@ int useObjects() {
     // Dark green background
     glClearColor(0.0f, 0.4f, 0.0f, 0.0f);
 
+    GLuint texture_id { util::loadBMP("uvtemplate.bmp")};
+
+    if(texture_id == 0) {
+        printf("couldn't load bmp file exiting program.\n");
+        return 0;
+    }
+
+    std::mt19937 mt{static_cast<std::mt19937::result_type>(std::chrono::steady_clock::now().time_since_epoch().count())};
+    std::uniform_real_distribution color_generator{0.0f, 1.0f};
 
     // Array with the vertices for a triangle
     static const std::vector<GLfloat> g_vertex_buffer_data_triangle = {
@@ -65,6 +77,12 @@ int useObjects() {
       1.0f, -1.0f, 0.0f,
       0.0f, 1.0f, 0.0f,
     };
+
+    std::vector<GLfloat> triangle_color_data{};
+    triangle_color_data.resize(g_vertex_buffer_data_triangle.size());
+    for(size_t index = 0; index < triangle_color_data.size(); ++index) {
+        triangle_color_data[index] = color_generator(mt);
+    }
 
     static const std::vector<GLfloat> g_color_buffer_data_triangle = {
       1.0f, 0.0f, 0.0f,
@@ -111,6 +129,12 @@ int useObjects() {
         1.0f,-1.0f, 1.0f
     };
 
+    std::vector<GLfloat> cube_color_data = {};
+    cube_color_data.resize(g_vertex_buffer_data_cube.size());
+    for(size_t index = 0; index < cube_color_data.size(); ++index) {
+        cube_color_data[index] = color_generator(mt);
+    }
+
     // One color for each vertex. They were generated randomly.
     static const std::vector<GLfloat> g_color_buffer_data_cube = {
         0.583f,  0.771f,  0.014f,
@@ -151,29 +175,72 @@ int useObjects() {
         0.982f,  0.099f,  0.879f
     };
 
-    StaticDrawable cube{"shaders/defaultVertexShader.vertexshader", "shaders/defaultFragmentShader.fragmentshader"};
+    // Two UV coordinatesfor each vertex. They were created with Blender. You'll learn shortly how to do this yourself.
+    static const std::vector<GLfloat> cube_uv_buffer_data = {
+        0.000059f, 1.0f-0.000004f,
+        0.000103f, 1.0f-0.336048f,
+        0.335973f, 1.0f-0.335903f,
+        1.000023f, 1.0f-0.000013f,
+        0.667979f, 1.0f-0.335851f,
+        0.999958f, 1.0f-0.336064f,
+        0.667979f, 1.0f-0.335851f,
+        0.336024f, 1.0f-0.671877f,
+        0.667969f, 1.0f-0.671889f,
+        1.000023f, 1.0f-0.000013f,
+        0.668104f, 1.0f-0.000013f,
+        0.667979f, 1.0f-0.335851f,
+        0.000059f, 1.0f-0.000004f,
+        0.335973f, 1.0f-0.335903f,
+        0.336098f, 1.0f-0.000071f,
+        0.667979f, 1.0f-0.335851f,
+        0.335973f, 1.0f-0.335903f,
+        0.336024f, 1.0f-0.671877f,
+        1.000004f, 1.0f-0.671847f,
+        0.999958f, 1.0f-0.336064f,
+        0.667979f, 1.0f-0.335851f,
+        0.668104f, 1.0f-0.000013f,
+        0.335973f, 1.0f-0.335903f,
+        0.667979f, 1.0f-0.335851f,
+        0.335973f, 1.0f-0.335903f,
+        0.668104f, 1.0f-0.000013f,
+        0.336098f, 1.0f-0.000071f,
+        0.000103f, 1.0f-0.336048f,
+        0.000004f, 1.0f-0.671870f,
+        0.336024f, 1.0f-0.671877f,
+        0.000103f, 1.0f-0.336048f,
+        0.336024f, 1.0f-0.671877f,
+        0.335973f, 1.0f-0.335903f,
+        0.667969f, 1.0f-0.671889f,
+        1.000004f, 1.0f-0.671847f,
+        0.667979f, 1.0f-0.335851f
+    };
+
+    StaticDrawable cube{"shaders/defaultTextureVertexShader.vertexshader", "shaders/defaultTextureFragmentShader.fragmentshader", true};
     cube.setVertices(g_vertex_buffer_data_cube);
-    cube.setColors(g_color_buffer_data_cube);
+    cube.setColors(cube_color_data);
+    cube.setTextureUVData(cube_uv_buffer_data);
+    cube.setTextureId(texture_id);
+    cube.translate(glm::translate(glm::mat4{}, glm::vec3(-2.0f, 1.0f, 3.0f)));
     cube.translate(glm::mat4(1.0f));
     cube.rotate(glm::mat4(1.0f));
     cube.scale(glm::mat4(1.0f));
     cube.init();
 
 
-    StaticDrawable triangle{"shaders/defaultVertexShader.vertexshader", "shaders/defaultFragmentShader.fragmentshader"};
-    triangle.setVertices(g_vertex_buffer_data_triangle);
-    triangle.setColors(g_color_buffer_data_triangle);
-    triangle.translate(glm::mat4(1.0f));
-    triangle.rotate(glm::mat4(1.0f));
-    triangle.scale(glm::mat4(1.0f));
-    triangle.init();
+//    StaticDrawable triangle{"shaders/defaultVertexShader.vertexshader", "shaders/defaultFragmentShader.fragmentshader"};
+//    triangle.setVertices(g_vertex_buffer_data_triangle);
+//    triangle.setColors(triangle_color_data);
+//    triangle.translate(glm::mat4(1.0f));
+//    triangle.rotate(glm::mat4(1.0f));
+//    triangle.scale(glm::mat4(1.0f));
+//    triangle.init();
 
 
     // Projection Matrix
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float) width / (float) height, 0.1f, 100.0f);
 
     // for an ortho camera
-//     glm::mat4 projectionMatrix = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 100.0f); // In world coordiantes
+//    glm::mat4 projectionMatrix = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 100.0f); // In world coordiantes
 
     // Camera/View Matrix
     glm::mat4 viewMatrix = glm::lookAt(
@@ -385,6 +452,7 @@ int allInOne() {
 //    glm::mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
 
     GLuint matrixID = glGetUniformLocation(program_id, "MVP");
+
 
     float z_axis_rotation = 1.0f;
 

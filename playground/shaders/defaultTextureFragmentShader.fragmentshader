@@ -1,0 +1,17 @@
+#version 330 core
+// Interpolated value from the vertex shader
+in vec2 UV;
+
+// Output data
+out vec3 color;
+
+// Values that stay constant for the whole mesh.
+uniform sampler2D myTextureSampler;
+
+void main(void)
+{
+    // gl_FragColor = texture2D(qt_Texture0, qt_TexCoord0.st);
+    // Output color = color specified in the vertex shader,
+    // interpolated between all 3 surrounding vertices
+    color = texture(myTextureSampler, UV).rgb;
+}

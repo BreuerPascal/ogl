@@ -519,12 +519,16 @@ add_executable(playground
 #	common/shader.hpp
         playground/util/shaderloader.h
         playground/util/shaderloader.cpp
+        playground/util/imageloader.h
+        playground/util/imageloader.cpp
 
         playground/shaders/SimpleVertexShader.vertexshader
         playground/shaders/SimpleFragmentShader.fragmentshader
         playground/shaders/SimpleFragmentShaderBlue.fragmentshader
         playground/shaders/defaultVertexShader.vertexshader
         playground/shaders/defaultFragmentShader.fragmentshader
+        playground/shaders/defaultTextureVertexShader.vertexshader
+        playground/shaders/defaultTextureFragmentShader.fragmentshader
         playground/staticdrawable.h
         playground/staticdrawable.cpp
 )

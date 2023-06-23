@@ -2,12 +2,17 @@
 
 #include "util/shaderloader.h"
 
-StaticDrawable::StaticDrawable(const std::string_view &vertexShader, const std::string_view &fragmentShader)
+#include <iostream>
+
+StaticDrawable::StaticDrawable(const std::string_view &vertexShader, const std::string_view &fragmentShader, bool hasTexture)
 {
     glGenVertexArrays(1, &m_vertexArrayId);
     ShaderLoader shaderLoader{};
     m_programId = shaderLoader.load(vertexShader, fragmentShader);
     m_matrixId = glGetUniformLocation(m_programId, "MVP");
+    if(hasTexture) {
+        m_textureUniformId.emplace(glGetUniformLocation(m_programId, "myTextureSampler"));
+    }
 
 }
 
@@ -38,15 +43,32 @@ void StaticDrawable::draw(glm::mat4 &viewMatrix, glm::mat4 &projectionMatrix)
     );
     // 2nd attribute buffer : colors
     glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, m_colorbuffer);
-    glVertexAttribPointer(
-                1,          // attribute. No particular reason for 1, but must match the layout in the shader.
-                3,          // size
-                GL_FLOAT,   // type
-                GL_FALSE,   // normalized?
-                0,          // stride
-                (void*) 0   // array buffer offset
-    );
+    if(m_textureUVData.empty()) {
+        glBindBuffer(GL_ARRAY_BUFFER, m_colorbuffer);
+        glVertexAttribPointer(
+                    1,          // attribute. No particular reason for 1, but must match the layout in the shader.
+                    3,          // size
+                    GL_FLOAT,   // type
+                    GL_FALSE,   // normalized?
+                    0,          // stride
+                    (void*) 0   // array buffer offset
+        );
+    } else {
+        // Bind our texture in Texture Unit 0
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_textureId);
+        // Set our "myTextureSampler" sampler to use Texture Unit 0
+        glUniform1i(m_textureUniformId.value(), 0);
+        glBindBuffer(GL_ARRAY_BUFFER, m_uvBuffer);
+        glVertexAttribPointer(
+                    1,          // attribute. No particular reason for 1, but must match the layout in the shader.
+                    2,          // size
+                    GL_FLOAT,   // type
+                    GL_FALSE,   // normalized?
+                    0,          // stride
+                    (void*) 0   // array buffer offset
+        );
+    }
 
     // Draw the triangle!
     glDrawArrays(GL_TRIANGLES, 0, m_vertices.size()); // 12 triangles with 3 vertices each
@@ -74,9 +96,19 @@ void StaticDrawable::setVertices(std::vector<GLfloat> vertices)
     m_vertices = vertices;
 }
 
+void StaticDrawable::setTextureUVData(std::vector<GLfloat> texture)
+{
+    m_textureUVData = texture;
+}
+
 void StaticDrawable::setColors(std::vector<GLfloat> colors)
 {
     m_colors = colors;
+}
+
+void StaticDrawable::setTextureId(GLuint textureId)
+{
+    m_textureId = textureId;
 }
 
 void StaticDrawable::init()
@@ -87,10 +119,27 @@ void StaticDrawable::init()
     // Give our vertices to OpenGL
     glBufferData(GL_ARRAY_BUFFER, m_vertices.size()*sizeof(GLfloat), m_vertices.data(), GL_STATIC_DRAW);
 
-    glGenBuffers(1, &m_colorbuffer);
-    // The following commands will talk about our 'vertexbuffer' buffer
-    glBindBuffer(GL_ARRAY_BUFFER, m_colorbuffer);
-    // Give our vertices to OpenGL
-    glBufferData(GL_ARRAY_BUFFER, m_colors.size() * sizeof(GLfloat), m_colors.data(), GL_STATIC_DRAW);
+//    if(!m_colors.empty()) {
+
+//        glGenBuffers(1, &m_colorbuffer);
+//        // The following commands will talk about our 'vertexbuffer' buffer
+//        glBindBuffer(GL_ARRAY_BUFFER, m_colorbuffer);
+//        // Give our vertices to OpenGL
+//        glBufferData(GL_ARRAY_BUFFER, m_colors.size() * sizeof(GLfloat), m_colors.data(), GL_STATIC_DRAW);
+//    }
+
+    if(!m_textureUVData.empty()) {
+        glGenBuffers(1, &m_uvBuffer);
+        // The following commands will talk about our 'vertexbuffer' buffer
+        glBindBuffer(GL_ARRAY_BUFFER, m_uvBuffer);
+        // Give our vertices to OpenGL
+        glBufferData(GL_ARRAY_BUFFER, m_textureUVData.size() * sizeof(GLfloat), m_textureUVData.data(), GL_STATIC_DRAW);
+    } else {
+        glGenBuffers(1, &m_colorbuffer);
+        // The following commands will talk about our 'vertexbuffer' buffer
+        glBindBuffer(GL_ARRAY_BUFFER, m_colorbuffer);
+        // Give our vertices to OpenGL
+        glBufferData(GL_ARRAY_BUFFER, m_colors.size() * sizeof(GLfloat), m_colors.data(), GL_STATIC_DRAW);
+    }
 }
 
